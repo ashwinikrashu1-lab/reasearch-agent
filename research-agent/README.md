@@ -62,7 +62,6 @@ source venv/bin/activate
 
 pip install -r requirements.txt
 ```
-
 ### 2. Configure Environment
 
 ```bash
