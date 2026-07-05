@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Chat — ResearchAI{% endblock %}
+
+{% block content %}
+<div class="chat-layout d-flex" style="height:calc(100vh - 58px); overflow:hidden">
+
+  <!-- Sidebar -->
+  <aside class="chat-sidebar d-flex flex-column border-end border-secondary" style="width:260px;min-width:220px">
+    <div class="p-3 border-bottom border-secondary">
+      <button class="btn btn-primary w-100" id="btnNewSession">
+        <i class="bi bi-plus-lg me-2"></i>New Session
+      </button>
+    </div>
+    <div class="p-2 flex-grow-1 overflow-auto">
+      <p class="text-muted small px-2 mb-1">HISTORY</p>
+      <div id="sessionList">
+        {% for s in sessions %}
+        <a href="/chat/{{ s.id }}"
+           class="session-item d-flex align-items-center gap-2 px-2 py-2 rounded text-decoration-none mb-1
+                  {% if session and session.id == s.id %}active{% endif %}">
+          <i class="bi bi-chat-left-text flex-shrink-0"></i>
+          <span class="text-truncate small">{{ s.title }}</span>
+        </a>
+        {% else %}
+        <p class="text-muted small px-2">No sessions yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+    <!-- Mode selector -->
+    <div class="p-3 border-top border-secondary">
+      <p class="text-muted small mb-2">RESEARCH MODE</p>
+      <select class="form-select form-select-sm bg-dark text-white border-secondary" id="modeSelect">
+        <option value="chat">💬 Chat / Q&A</option>
+        <option value="search">🔍 Search Papers</option>
+        <option value="report">📄 Generate Report</option>
+        <option value="gaps">💡 Research Gaps</option>
+        <option value="cite">📚 Generate Citations</option>
+      </select>
+      <select class="form-select form-select-sm bg-dark text-white border-secondary mt-2" id="citationStyle">
+        <option value="APA">APA</option>
+        <option value="IEEE">IEEE</option>
+        <option value="MLA">MLA</option>
+      </select>
+    </div>
+  </aside>
+
+  <!-- Main chat area -->
+  <main class="d-flex flex-column flex-grow-1 overflow-hidden">
+
+    <!-- Header -->
+    <div class="chat-header px-4 py-3 border-bottom border-secondary d-flex align-items-center justify-content-between">
+      <div>
+        <h6 class="mb-0 fw-semibold" id="sessionTitle">
+          {% if session %}{{ session.title }}{% else %}New Research Session{% endif %}
+        </h6>
+        <small class="text-muted" id="modeLabel">Mode: Chat / Q&A</small>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-secondary" id="btnUploadPdf" title="Upload PDF">
+          <i class="bi bi-upload"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-danger" id="btnClearChat" title="Clear chat">
+          <i class="bi bi-trash3"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages flex-grow-1 overflow-auto p-4" id="chatMessages">
+      {% if messages %}
+        {% for msg in messages %}
+        <div class="chat-bubble {{ msg.role }} mb-4" data-type="{{ msg.msg_type }}">
+          <div class="bubble-meta mb-1">
+            <span class="badge {% if msg.role=='user' %}bg-primary{% else %}bg-secondary{% endif %} me-2">
+              {% if msg.role=='user' %}<i class="bi bi-person-fill me-1"></i>You{% else %}<i class="bi bi-robot me-1"></i>ResearchAI{% endif %}
+            </span>
+            <small class="text-muted">{{ msg.created_at.strftime('%H:%M') }}</small>
+          </div>
+          <div class="bubble-content {% if msg.role=='assistant' %}markdown-body{% endif %}">
+            {% if msg.role=='assistant' %}{{ msg.content | safe }}{% else %}{{ msg.content }}{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="welcome-msg text-center py-5" id="welcomeMsg">
+        <i class="bi bi-robot fs-1 text-primary mb-3 d-block"></i>
+        <h5 class="fw-semibold">Hello! I'm ResearchAI</h5>
+        <p class="text-muted mb-4">Ask me anything about research — search papers, get summaries,<br>generate citations, or find research gaps.</p>
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+          <button class="btn btn-outline-secondary btn-sm suggestion-btn">🔍 Search papers on transformer models</button>
+          <button class="btn btn-outline-secondary btn-sm suggestion-btn">📄 Generate a report on climate change AI</button>
+          <button class="btn btn-outline-secondary btn-sm suggestion-btn">💡 Research gaps in federated learning</button>
+          <button class="btn btn-outline-secondary btn-sm suggestion-btn">📚 APA citations for quantum computing</button>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Upload progress (hidden) -->
+    <div id="pdfUploadBar" class="d-none px-4 py-2 border-top border-secondary">
+      <div class="d-flex align-items-center gap-2">
+        <div class="progress flex-grow-1"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width:100%"></div></div>
+        <small class="text-muted">Analysing PDF…</small>
+      </div>
+    </div>
+
+    <!-- Input bar -->
+    <div class="chat-input-bar px-4 py-3 border-top border-secondary">
+      <div class="input-group">
+        <button class="btn btn-outline-secondary" id="btnAttach" title="Attach PDF">
+          <i class="bi bi-paperclip"></i>
+        </button>
+        <textarea class="form-control bg-dark text-white border-secondary" id="userInput"
+                  placeholder="Ask a research question…" rows="1" style="resize:none;"></textarea>
+        <button class="btn btn-primary" id="btnSend">
+          <i class="bi bi-send-fill"></i>
+        </button>
+      </div>
+      <input type="file" id="hiddenFileInput" accept=".pdf" class="d-none"/>
+      <div class="d-flex justify-content-between mt-2">
+        <small class="text-muted">Press <kbd>Ctrl+Enter</kbd> to send</small>
+        <small class="text-muted" id="charCount">0 chars</small>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const SESSION_ID = {% if session %}{{ session.id }}{% else %}null{% endif %};
+</script>
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}ResearchAI — Home{% endblock %}
+{% block content %}
+
+<!-- Hero -->
+<section class="hero-section text-center py-5">
+  <div class="container py-4">
+    <div class="hero-icon mx-auto mb-4">
+      <svg width="64" height="64" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="8" fill="#0f62fe"/>
+        <path d="M8 16 L14 10 L20 16 L14 22 Z" fill="white" opacity="0.9"/>
+        <circle cx="22" cy="10" r="4" fill="white" opacity="0.7"/>
+      </svg>
+    </div>
+    <h1 class="display-5 fw-bold mb-3">AI-Powered Research Agent</h1>
+    <p class="lead text-muted mb-4 mx-auto" style="max-width:560px">
+      Powered by <strong>IBM Granite</strong> on watsonx.ai — search papers, extract insights,
+      generate citations, discover research gaps, and build structured reports instantly.
+    </p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <a href="/chat" class="btn btn-primary btn-lg px-4"><i class="bi bi-chat-dots me-2"></i>Start Researching</a>
+      <a href="#features" class="btn btn-outline-secondary btn-lg px-4"><i class="bi bi-info-circle me-2"></i>Learn More</a>
+    </div>
+  </div>
+</section>
+
+<!-- Stats row -->
+<section class="py-3 border-top border-bottom border-secondary bg-dark">
+  <div class="container">
+    <div class="row text-center g-3">
+      <div class="col-6 col-md-3"><div class="stat-card p-3 rounded"><div class="fs-2 fw-bold text-primary">arXiv</div><small class="text-muted">Live Paper Search</small></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card p-3 rounded"><div class="fs-2 fw-bold text-primary">3</div><small class="text-muted">Citation Styles</small></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card p-3 rounded"><div class="fs-2 fw-bold text-primary">PDF</div><small class="text-muted">Document Analysis</small></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card p-3 rounded"><div class="fs-2 fw-bold text-primary">AI</div><small class="text-muted">IBM Granite LLM</small></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="features" class="py-5">
+  <div class="container">
+    <h2 class="text-center fw-bold mb-5">What ResearchAI Can Do</h2>
+    <div class="row g-4">
+      {% set features = [
+        ("bi-search","Search Papers","Query arXiv and retrieve relevant papers, abstracts, authors, and links in seconds.","primary"),
+        ("bi-file-text","Summarise & Analyse","Get concise summaries and key insights from papers or uploaded PDFs.","info"),
+        ("bi-quote","Generate Citations","Produce formatted citations in APA, IEEE, or MLA style automatically.","success"),
+        ("bi-lightbulb","Research Gaps","Identify open questions and generate testable hypotheses from the literature.","warning"),
+        ("bi-journal-richtext","Structured Reports","Generate full academic reports with intro, literature review, and conclusions.","danger"),
+        ("bi-upload","PDF Upload","Upload your own PDFs and let the AI extract text, insights, and summaries.","secondary"),
+      ] %}
+      {% for icon, title, desc, color in features %}
+      <div class="col-md-4 col-sm-6">
+        <div class="feature-card card h-100 border-0 p-4">
+          <div class="feature-icon mb-3 text-{{ color }}">
+            <i class="bi {{ icon }} fs-2"></i>
+          </div>
+          <h5 class="fw-semibold mb-2">{{ title }}</h5>
+          <p class="text-muted small mb-0">{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Quick Actions -->
+<section class="py-4 bg-surface">
+  <div class="container">
+    <h3 class="fw-semibold mb-4 text-center">Quick Actions</h3>
+    <div class="row g-3 justify-content-center">
+      <div class="col-md-5">
+        <div class="card border-0 p-4">
+          <h5 class="fw-semibold mb-3"><i class="bi bi-upload text-primary me-2"></i>Upload PDF</h5>
+          <div id="dropzone" class="dropzone-area text-center p-4 rounded mb-3">
+            <i class="bi bi-file-earmark-pdf fs-1 text-muted"></i>
+            <p class="mt-2 mb-0 text-muted">Drag & drop PDF here or</p>
+            <label class="btn btn-outline-primary btn-sm mt-2" for="pdfFile">Browse File</label>
+            <input type="file" id="pdfFile" accept=".pdf" class="d-none"/>
+          </div>
+          <div id="uploadStatus" class="d-none">
+            <div class="progress mb-2"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width:100%"></div></div>
+            <p class="text-muted small mb-0">Analysing PDF…</p>
+          </div>
+          <div id="uploadResult" class="d-none"></div>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div class="card border-0 p-4">
+          <h5 class="fw-semibold mb-3"><i class="bi bi-clock-history text-info me-2"></i>Recent Sessions</h5>
+          {% if sessions %}
+            <div class="list-group list-group-flush">
+              {% for s in sessions[:5] %}
+              <a href="/chat/{{ s.id }}" class="list-group-item list-group-item-action bg-transparent border-secondary py-2">
+                <i class="bi bi-chat-left-text me-2 text-muted"></i>
+                <span class="text-truncate d-inline-block" style="max-width:260px">{{ s.title }}</span>
+                <small class="text-muted ms-auto float-end">{{ s.updated_at.strftime('%b %d') }}</small>
+              </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-muted small">No sessions yet. <a href="/chat">Start your first research session.</a></p>
+          {% endif %}
+          <a href="/chat" class="btn btn-primary w-100 mt-3"><i class="bi bi-plus-circle me-2"></i>New Session</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// PDF upload on home page
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('pdfFile');
+const uploadStatus = document.getElementById('uploadStatus');
+const uploadResult = document.getElementById('uploadResult');
+
+if(dropzone){
+  dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+  dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('drag-over'); if(e.dataTransfer.files[0]) handleUpload(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', () => { if(fileInput.files[0]) handleUpload(fileInput.files[0]); });
+}
+
+async function handleUpload(file){
+  uploadStatus.classList.remove('d-none');
+  uploadResult.classList.add('d-none');
+  const fd = new FormData();
+  fd.append('file', file);
+  try {
+    const res = await fetch('/api/upload', { method:'POST', body: fd });
+    const data = await res.json();
+    uploadStatus.classList.add('d-none');
+    uploadResult.classList.remove('d-none');
+    if(data.error){ uploadResult.innerHTML = `<div class="alert alert-danger">${data.error}</div>`; return; }
+    uploadResult.innerHTML = `
+      <div class="alert alert-success mb-2"><i class="bi bi-check-circle me-1"></i> <strong>${file.name}</strong> analysed!</div>
+      <div class="p-3 bg-surface rounded small"><strong>Summary:</strong><br>${marked.parse(data.summary||'')}</div>
+      <div class="mt-2 p-3 bg-surface rounded small"><strong>Key Insights:</strong><br>${marked.parse(data.insights||'')}</div>`;
+  } catch(e) {
+    uploadStatus.classList.add('d-none');
+    uploadResult.classList.remove('d-none');
+    uploadResult.innerHTML = `<div class="alert alert-danger">Upload failed: ${e.message}</div>`;
+  }
+}
+</script>
+{% endblock %}
